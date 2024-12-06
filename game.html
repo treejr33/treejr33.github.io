@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜数字游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #888;
+        }
+        .bubble {
+            position: absolute;
+            bottom: 0;
+            cursor: pointer;
+            animation: rise 15s infinite linear; /* 速度为原来的三倍 */
+            background: radial-gradient(circle, rgba(173, 216, 230, 0.1) 0%, rgba(173, 216, 230, 0.7) 80%, rgba(173, 216, 230, 1) 100%);
+            border-radius: 50%; /* 将泡泡设置为圆形 */
+        }
+        @keyframes rise {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-100vh);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>猜数字游戏</h1>
+    <p>我想了一个1到100之间的数字，你能猜到吗？</p>
+    <input type="number" id="guessInput" placeholder="输入你的猜测">
+    <button onclick="checkGuess()">提交</button>
+    <button id="restartButton" onclick="restartGame()" style="display: none;">再玩一次</button>
+    <button onclick="resetGame()">重新开始</button>
+    <p id="result"></p>
+    <p id="range">当前范围：1 - 100</p>
+    <p id="attempts">已使用的猜测次数：0</p>
+
+    <script>
+        let randomNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        let minRange = 1;
+        let maxRange = 100;
+
+        function checkGuess() {
+            const userGuess = Number(document.getElementById('guessInput').value);
+            attempts++;
+            const resultElement = document.getElementById('result');
+            const rangeElement = document.getElementById('range');
+            const attemptsElement = document.getElementById('attempts');
+            const restartButton = document.getElementById('restartButton');
+
+            if (userGuess === randomNumber) {
+                resultElement.textContent = `恭喜你！你用了${attempts}次就猜对了！`;
+                restartButton.style.display = 'inline';
+            } else if (userGuess < randomNumber) {
+                resultElement.textContent = '太低了，再试一次！';
+                minRange = Math.max(minRange, userGuess + 1);
+            } else {
+                resultElement.textContent = '太高了，再试一次！';
+                maxRange = Math.min(maxRange, userGuess - 1);
+            }
+
+            rangeElement.textContent = `当前范围：${minRange} - ${maxRange}`;
+            attemptsElement.textContent = `已使用的猜测次数：${attempts}`;
+        }
+
+        function restartGame() {
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            minRange = 1;
+            maxRange = 100;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('result').textContent = '';
+            document.getElementById('range').textContent = '当前范围：1 - 100';
+            document.getElementById('attempts').textContent = '已使用的猜测次数：0';
+            document.getElementById('restartButton').style.display = 'none';
+        }
+
+        function resetGame() {
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            minRange = 1;
+            maxRange = 100;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('result').textContent = '';
+            document.getElementById('range').textContent = '当前范围：1 - 100';
+            document.getElementById('attempts').textContent = '已使用的猜测次数：0';
+            document.getElementById('restartButton').style.display = 'none';
+        }
+
+        // Create dynamic bubbles
+        function createBubbles() {
+            const bubbleCount = 30;
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.width = bubble.style.height = `${(Math.random() * 20 + 10) * 3}px`; // 体积扩大一倍
+                bubble.addEventListener('click', splitBubble); // 添加点击事件监听器
+                document.body.appendChild(bubble);
+            }
+        }
+
+        // Split bubble into smaller bubbles
+        function splitBubble(event) {
+            const bubble = event.target;
+            const bubbleRect = bubble.getBoundingClientRect();
+            const bubbleSize = parseInt(bubble.style.width);
+
+            // Remove the original bubble
+            bubble.remove();
+
+            // Create smaller bubbles
+            for (let i = 0; i < 3; i++) {
+                const smallBubble = document.createElement('div');
+                smallBubble.className = 'bubble';
+                smallBubble.style.left = `${bubbleRect.left + Math.random() * bubbleSize}px`;
+                smallBubble.style.bottom = `${window.innerHeight - bubbleRect.top}px`;
+                smallBubble.style.width = smallBubble.style.height = `${bubbleSize / 2}px`;
+                smallBubble.style.animationDuration = `${Math.random() * 15 + 9}s`; // 速度为原来的三倍
+                smallBubble.style.animationTimingFunction = 'linear';
+                smallBubble.addEventListener('click', splitBubble); // 添加点击事件监听器
+                document.body.appendChild(smallBubble);
+            }
+        }
+
+        createBubbles();
+    </script>
+
+    <footer>
+        hnhz工作室出品
+    </footer>
+</body>
+</html>
