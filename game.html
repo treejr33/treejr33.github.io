@@ -140,6 +140,36 @@
         .shake {
             animation: shake 0.3s;
         }
+        .audio-controls {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            width: 80%;
+        }
+        .audio-controls button {
+            margin: 0 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .audio-controls button.play {
+            color: green;
+        }
+        .audio-controls button.pause {
+            color: red;
+        }
+        .audio-controls input[type="range"] {
+            flex-grow: 1;
+            margin: 0 10px;
+        }
     </style>
 </head>
 <body>
@@ -155,7 +185,44 @@
         <p>请选择一个游戏开始玩！</p>
     </div>
 
+    <audio id="bgm" src="audio/bgm.mp3" loop></audio>
+    <div class="audio-controls">
+        <button id="playPauseBtn" class="play">▶️</button>
+        <input type="range" id="progressBar" value="0" max="100">
+    </div>
+
     <script>
+        const audio = document.getElementById('bgm');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+
+        audio.play();
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playPauseBtn.textContent = '⏸️';
+                playPauseBtn.classList.remove('play');
+                playPauseBtn.classList.add('pause');
+            } else {
+                audio.pause();
+                playPauseBtn.textContent = '▶️';
+                playPauseBtn.classList.remove('pause');
+                playPauseBtn.classList.add('play');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+        });
+
+        progressBar.addEventListener('input', () => {
+            const newTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = newTime;
+        });
+
+        // Existing game logic...
         let randomNumber = Math.floor(Math.random() * 100) + 1;
         let attempts = 0;
         let minRange = 1;
