@@ -3,24 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>猜数字游戏</title>
+    <title>小游戏合集</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
             margin-top: 50px;
             overflow: hidden;
             position: relative;
             height: 100vh;
+            background: linear-gradient(135deg, #f0e6f6, #fff5cc);
+        }
+        nav {
+            background-color: rgba(70, 130, 180, 0.8);
+            padding: 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 20px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            transition: color 0.3s, transform 0.3s;
+        }
+        nav ul li a:hover {
+            color: #ffeb3b;
+            transform: scale(1.1);
+        }
+        .content {
+            margin-top: 80px;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .hole {
+            width: 100px;
+            height: 100px;
+            background-color: #8b4513;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+        .mole {
+            width: 80px;
+            height: 80px;
+            background-color: #708090;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -80px;
+            left: 10px;
+            transition: bottom 0.3s;
+        }
+        .mole.up {
+            bottom: 10px;
         }
         input {
             padding: 10px;
             font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4682b4;
+            outline: none;
         }
         button {
             padding: 10px 20px;
             font-size: 16px;
             margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4682b4;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background-color: #5a9bd4;
+            transform: translateY(-2px);
         }
         footer {
             margin-top: 50px;
@@ -31,9 +112,10 @@
             position: absolute;
             bottom: 0;
             cursor: pointer;
-            animation: rise 15s infinite linear; /* 速度为原来的三倍 */
+            animation: rise 15s infinite linear;
             background: radial-gradient(circle, rgba(173, 216, 230, 0.1) 0%, rgba(173, 216, 230, 0.7) 80%, rgba(173, 216, 230, 1) 100%);
-            border-radius: 50%; /* 将泡泡设置为圆形 */
+            border-radius: 50%;
+            opacity: 0.8;
         }
         @keyframes rise {
             0% {
@@ -46,18 +128,28 @@
                 transform: translateY(0);
             }
         }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake {
+            animation: shake 0.3s;
+        }
     </style>
 </head>
 <body>
-    <h1>猜数字游戏</h1>
-    <p>我想了一个1到100之间的数字，你能猜到吗？</p>
-    <input type="number" id="guessInput" placeholder="输入你的猜测">
-    <button onclick="checkGuess()">提交</button>
-    <button id="restartButton" onclick="restartGame()" style="display: none;">再玩一次</button>
-    <button onclick="resetGame()">重新开始</button>
-    <p id="result"></p>
-    <p id="range">当前范围：1 - 100</p>
-    <p id="attempts">已使用的猜测次数：0</p>
+    <nav>
+        <ul>
+            <li><a href="#" onclick="showGame('guessNumber')">猜数字</a></li>
+            <li><a href="#" onclick="showGame('whackAMole')">打地鼠</a></li>
+            <li><a href="#" onclick="showGame('comingSoon')">游戏三</a></li>
+        </ul>
+    </nav>
+    <div class="content" id="gameContent">
+        <h1>欢迎来到小游戏合集</h1>
+        <p>请选择一个游戏开始玩！</p>
+    </div>
 
     <script>
         let randomNumber = Math.floor(Math.random() * 100) + 1;
@@ -112,6 +204,104 @@
             document.getElementById('restartButton').style.display = 'none';
         }
 
+        function showGame(game) {
+            const gameContent = document.getElementById('gameContent');
+            if (game === 'guessNumber') {
+                gameContent.innerHTML = `
+                    <h1>猜数字游戏</h1>
+                    <p>我想了一个1到100之间的数字，你能猜到吗？</p>
+                    <input type="number" id="guessInput" placeholder="输入你的猜测">
+                    <button onclick="checkGuess()">提交</button>
+                    <button id="restartButton" onclick="restartGame()" style="display: none;">再玩一次</button>
+                    <button onclick="resetGame()">重新开始</button>
+                    <p id="result"></p>
+                    <p id="range">当前范围：1 - 100</p>
+                    <p id="attempts">已使用的猜测次数：0</p>
+                `;
+                restartGame();
+            } else if (game === 'whackAMole') {
+                gameContent.innerHTML = `
+                    <h1>打地鼠游戏</h1>
+                    <div class="game-grid">
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                        <div class="hole" onclick="whack(this)"><div class="mole"></div></div>
+                    </div>
+                    <button onclick="startWhackAMole()">开始游戏</button>
+                    <button id="restartWhackButton" onclick="startWhackAMole()" style="display: none;">再玩一次</button>
+                    <p id="score">得分: 0</p>
+                    <p id="timer">时间: 10秒</p>
+                `;
+            } else {
+                gameContent.innerHTML = `<h1>待开发</h1><p>此游戏尚未开发，敬请期待！</p>`;
+            }
+        }
+
+        let lastHole;
+        let timeUp = false;
+        let score = 0;
+        let countdown;
+
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole === lastHole) {
+                return randomHole(holes);
+            }
+            lastHole = hole;
+            return hole;
+        }
+
+        function peep() {
+            const time = randomTime(200, 1000);
+            const holes = document.querySelectorAll('.hole');
+            const hole = randomHole(holes);
+            const mole = hole.querySelector('.mole');
+            mole.classList.add('up');
+            setTimeout(() => {
+                mole.classList.remove('up');
+                if (!timeUp) peep();
+            }, time);
+        }
+
+        function startWhackAMole() {
+            score = 0;
+            document.getElementById('score').textContent = `得分: ${score}`;
+            document.getElementById('restartWhackButton').style.display = 'none';
+            timeUp = false;
+            peep();
+            countdown = 10;
+            document.getElementById('timer').textContent = `时间: ${countdown}秒`;
+            const timerInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('timer').textContent = `时间: ${countdown}秒`;
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp = true;
+                    document.getElementById('restartWhackButton').style.display = 'inline';
+                }
+            }, 1000);
+        }
+
+        function whack(hole) {
+            if (!hole.querySelector('.mole').classList.contains('up')) return;
+            score++;
+            document.getElementById('score').textContent = `得分: ${score}`;
+            hole.querySelector('.mole').classList.remove('up');
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 300);
+        }
+
         // Create dynamic bubbles
         function createBubbles() {
             const bubbleCount = 30;
@@ -120,8 +310,8 @@
                 bubble.className = 'bubble';
                 bubble.style.left = `${Math.random() * 100}vw`;
                 bubble.style.animationDelay = `${Math.random() * 5}s`;
-                bubble.style.width = bubble.style.height = `${(Math.random() * 20 + 10) * 3}px`; // 体积扩大一倍
-                bubble.addEventListener('click', splitBubble); // 添加点击事件监听器
+                bubble.style.width = bubble.style.height = `${(Math.random() * 20 + 10) * 3}px`;
+                bubble.addEventListener('click', splitBubble);
                 document.body.appendChild(bubble);
             }
         }
@@ -132,19 +322,17 @@
             const bubbleRect = bubble.getBoundingClientRect();
             const bubbleSize = parseInt(bubble.style.width);
 
-            // Remove the original bubble
             bubble.remove();
 
-            // Create smaller bubbles
             for (let i = 0; i < 3; i++) {
                 const smallBubble = document.createElement('div');
                 smallBubble.className = 'bubble';
                 smallBubble.style.left = `${bubbleRect.left + Math.random() * bubbleSize}px`;
                 smallBubble.style.bottom = `${window.innerHeight - bubbleRect.top}px`;
                 smallBubble.style.width = smallBubble.style.height = `${bubbleSize / 2}px`;
-                smallBubble.style.animationDuration = `${Math.random() * 15 + 9}s`; // 速度为原来的三倍
+                smallBubble.style.animationDuration = `${Math.random() * 15 + 9}s`;
                 smallBubble.style.animationTimingFunction = 'linear';
-                smallBubble.addEventListener('click', splitBubble); // 添加点击事件监听器
+                smallBubble.addEventListener('click', splitBubble);
                 document.body.appendChild(smallBubble);
             }
         }
