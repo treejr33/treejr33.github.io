@@ -21,15 +21,12 @@
 
         canvas {
             display: block;
-            background-image: url('fonts/SK2.jpeg'); /* Changed to local path */
-            background-size: cover;
-            background-repeat: no-repeat;
         }
 
         #score {
             font-size: 20px;
             color: white;
-            margin-top: 10px; /* Space between canvas and score */
+            margin-top: 10px;
         }
 
         .mode-selection {
@@ -104,17 +101,22 @@
         playerImg.src = 'fonts/mj.png'; // Changed to local path
         const enemyImg = new Image();
         enemyImg.src = 'fonts/dj.png'; // Changed to local path
+        const backgroundImg = new Image();
+        backgroundImg.src = 'fonts/SK2.jpeg'; // Background image path
 
         let playerReady = false;
         playerImg.onload = () => {
             playerReady = true;
             drawModeSelection(); // 在背景加载完后显示模式选择框
         };
-
-        const COLUMN_COUNT = 5;
-        const COLUMN_WIDTH = 100;
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight - 100; // Adjusted to leave space for score
+
+        const CENTER_COLUMN_WIDTH = 500;
+        const COLUMN_COUNT = 5;
+        const COLUMN_WIDTH = CENTER_COLUMN_WIDTH / COLUMN_COUNT;
+
+        const centerStartX = (canvas.width - CENTER_COLUMN_WIDTH) / 2;
 
         const PLAYER_WIDTH = 100;
         const PLAYER_HEIGHT = 100;
@@ -140,6 +142,8 @@
             height: PLAYER_HEIGHT,
             speed: 5,
             bullets: [],
+            touchStartX: 0, // 用于存储触摸的起始位置
+            touchEndX: 0, // 用于存储触摸的结束位置
         };
 
         const enemies = [];
@@ -148,6 +152,19 @@
             left: false,
             right: false,
         };
+
+        function drawBackground() {
+            ctx.fillStyle = '#000'; // 黑色背景填充
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(
+                backgroundImg,
+                centerStartX,
+                0,
+                CENTER_COLUMN_WIDTH,
+                canvas.height
+            );
+        }
 
         function drawPlayer() {
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
@@ -192,63 +209,14 @@
         }
 
         function spawnEnemies() {
-            // 修改敌机生成概率，在困难模式下减少敌机生成频率
             if (Math.random() < enemySpawnRate) {
                 const column = Math.floor(Math.random() * COLUMN_COUNT);
-                const x = column * COLUMN_WIDTH + (COLUMN_WIDTH - ENEMY_WIDTH) / 2;
+                const x = centerStartX + column * COLUMN_WIDTH + (COLUMN_WIDTH - ENEMY_WIDTH) / 2;
                 enemies.push({ x: x, y: 0, width: ENEMY_WIDTH, height: ENEMY_HEIGHT });
             }
         }
 
-        function checkCollision() {
-            enemies.forEach((enemy) => {
-                if (
-                    player.x < enemy.x + enemy.width &&
-                    player.x + player.width > enemy.x &&
-                    player.y < enemy.y + enemy.height &&
-                    player.y + player.height > enemy.y
-                ) {
-                    gameOver = true;
-                }
-            });
-        }
-
-        function movePlayer() {
-            if (keys.left && player.x > 0) {
-                player.x -= player.speed;
-            }
-            if (keys.right && player.x < canvas.width - player.width) {
-                player.x += player.speed;
-            }
-        }
-
-        function fireBullet() {
-            if (!playerReady) return;
-
-            const currentTime = Date.now();
-            if (currentTime - lastBulletTime >= BULLET_INTERVAL) {
-                player.bullets.push({
-                    x: player.x + player.width / 2 - BULLET_WIDTH / 2,
-                    y: player.y,
-                });
-                lastBulletTime = currentTime;
-            }
-        }
-
-        function drawGameOverScreen() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.fillRect(50, canvas.height / 2 - 100, canvas.width - 100, 200);
-
-            ctx.fillStyle = 'white';
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 30);
-            ctx.fillText(`恭喜您，获得了 ${score} 分！`, canvas.width / 2, canvas.height / 2 + 10);
-            ctx.fillText('再接再厉！', canvas.width / 2, canvas.height / 2 + 50);
-        }
-
         function drawModeSelection() {
-            // 绘制模式选择框
             const modeSelectionDiv = document.getElementById('modeSelection');
             modeSelectionDiv.style.display = 'block';
 
@@ -265,29 +233,25 @@
         }
 
         function startGame(mode) {
-            // 隐藏模式选择框
             document.getElementById('modeSelection').style.display = 'none';
 
             if (mode === 'easy') {
                 maxSpawnRate = 0.03;
                 enemySpeed = 0.7;
-                enemySpawnRate = 0.0025; // 简单模式的敌机生成概率
+                enemySpawnRate = 0.0025;
             } else if (mode === 'hard') {
                 maxSpawnRate = 0.035;
                 enemySpeed = 0.8;
-                enemySpawnRate = 0.0015; // 困难模式下减少敌机生成频率
+                enemySpawnRate = 0.0015;
             }
 
             gameLoop();
         }
 
         function gameLoop() {
-            if (!playerReady) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                return;
-            }
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+
             if (gameOver) {
                 drawGameOverScreen();
                 return;
@@ -296,7 +260,6 @@
             movePlayer();
             fireBullet();
             spawnEnemies();
-            checkCollision();
             drawPlayer();
             drawBullets();
             drawEnemies();
@@ -306,64 +269,83 @@
             requestAnimationFrame(gameLoop);
         }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') {
+        function drawGameOverScreen() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '48px Arial';
+            ctx.fillText('游戏结束', canvas.width / 2 - 120, canvas.height / 2);
+            ctx.font = '24px Arial';
+            ctx.fillText(`最终得分: ${score}`, canvas.width / 2 - 80, canvas.height / 2 + 40);
+        }
+
+        function movePlayer() {
+            if (keys.left) {
+                player.x -= player.speed;
+            }
+            if (keys.right) {
+                player.x += player.speed;
+            }
+
+            if (player.x < centerStartX) {
+                player.x = centerStartX;
+            }
+            if (player.x + player.width > centerStartX + CENTER_COLUMN_WIDTH) {
+                player.x = centerStartX + CENTER_COLUMN_WIDTH - player.width;
+            }
+
+            // 手机端拖动控制
+            if (player.touchStartX !== 0) {
+                const touchMoveX = player.touchEndX - player.touchStartX;
+                player.x = Math.max(centerStartX, Math.min(player.x + touchMoveX, centerStartX + CENTER_COLUMN_WIDTH - player.width));
+                player.touchStartX = 0; // Reset touch position
+            }
+        }
+
+        function fireBullet() {
+            const currentTime = Date.now();
+            if (currentTime - lastBulletTime > BULLET_INTERVAL) {
+                player.bullets.push({
+                    x: player.x + player.width / 2 - BULLET_WIDTH / 2,
+                    y: player.y,
+                });
+                lastBulletTime = currentTime;
+            }
+        }
+
+        // 监听键盘事件
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft' || event.key === 'a') {
                 keys.left = true;
             }
-            if (e.key === 'ArrowRight' || e.key === 'd') {
+            if (event.key === 'ArrowRight' || event.key === 'd') {
                 keys.right = true;
-            }
-            if (e.key === ' ') {
-                fireBullet();
             }
         });
 
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'a') {
+        document.addEventListener('keyup', (event) => {
+            if (event.key === 'ArrowLeft' || event.key === 'a') {
                 keys.left = false;
             }
-            if (e.key === 'ArrowRight' || e.key === 'd') {
+            if (event.key === 'ArrowRight' || event.key === 'd') {
                 keys.right = false;
             }
         });
 
-        let isTouchingPlayer = false;
-        let touchStartX = 0;
-        let touchOffsetX = 0;
-
-        // 触摸开始时
-        canvas.addEventListener('touchstart', (e) => {
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
-
-            if (
-                touchX >= player.x &&
-                touchX <= player.x + player.width &&
-                touchY >= player.y &&
-                touchY <= player.y + player.height
-            ) {
-                isTouchingPlayer = true;
-                touchStartX = touchX;
-                touchOffsetX = touchX - player.x;
-            }
+        // 手机端拖动事件
+        canvas.addEventListener('touchstart', (event) => {
+            player.touchStartX = event.touches[0].clientX;
         });
 
-        // 触摸移动时
-        canvas.addEventListener('touchmove', (e) => {
-            if (!isTouchingPlayer) return;
-
-            const touchX = e.touches[0].clientX;
-            const newX = touchX - touchOffsetX;
-
-            player.x = Math.min(Math.max(newX, 0), canvas.width - player.width);
-            player.y = canvas.height - player.height - 10;
+        canvas.addEventListener('touchmove', (event) => {
+            player.touchEndX = event.touches[0].clientX;
         });
 
-        // 触摸结束时
-        canvas.addEventListener('touchend', () => {
-            isTouchingPlayer = false;
-        });
-
+        playerImg.onload = () => {
+            playerReady = true;
+            drawModeSelection(); // 显示模式选择
+        };
     </script>
 </body>
 </html>
