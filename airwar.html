@@ -88,7 +88,6 @@
         <button id="easyMode">简单模式</button>
         <button id="hardMode">困难模式</button>
     </div>
-
     <script>
         document.getElementById('backButton').addEventListener('click', () => {
             window.location.href = 'game.html'; // Replace with your local page path
@@ -142,8 +141,6 @@
             height: PLAYER_HEIGHT,
             speed: 5,
             bullets: [],
-            touchStartX: 0, // 用于存储触摸的起始位置
-            touchEndX: 0, // 用于存储触摸的结束位置
         };
 
         const enemies = [];
@@ -294,58 +291,35 @@
             if (player.x + player.width > centerStartX + CENTER_COLUMN_WIDTH) {
                 player.x = centerStartX + CENTER_COLUMN_WIDTH - player.width;
             }
-
-            // 手机端拖动控制
-            if (player.touchStartX !== 0) {
-                const touchMoveX = player.touchEndX - player.touchStartX;
-                player.x = Math.max(centerStartX, Math.min(player.x + touchMoveX, centerStartX + CENTER_COLUMN_WIDTH - player.width));
-                player.touchStartX = 0; // Reset touch position
-            }
         }
 
         function fireBullet() {
-            const currentTime = Date.now();
-            if (currentTime - lastBulletTime > BULLET_INTERVAL) {
+            if (Date.now() - lastBulletTime > BULLET_INTERVAL) {
                 player.bullets.push({
                     x: player.x + player.width / 2 - BULLET_WIDTH / 2,
                     y: player.y,
                 });
-                lastBulletTime = currentTime;
+                lastBulletTime = Date.now();
             }
         }
 
-        // 监听键盘事件
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowLeft' || event.key === 'a') {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
                 keys.left = true;
             }
-            if (event.key === 'ArrowRight' || event.key === 'd') {
+            if (e.key === 'ArrowRight' || e.key === 'd') {
                 keys.right = true;
             }
         });
 
-        document.addEventListener('keyup', (event) => {
-            if (event.key === 'ArrowLeft' || event.key === 'a') {
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
                 keys.left = false;
             }
-            if (event.key === 'ArrowRight' || event.key === 'd') {
+            if (e.key === 'ArrowRight' || e.key === 'd') {
                 keys.right = false;
             }
         });
-
-        // 手机端拖动事件
-        canvas.addEventListener('touchstart', (event) => {
-            player.touchStartX = event.touches[0].clientX;
-        });
-
-        canvas.addEventListener('touchmove', (event) => {
-            player.touchEndX = event.touches[0].clientX;
-        });
-
-        playerImg.onload = () => {
-            playerReady = true;
-            drawModeSelection(); // 显示模式选择
-        };
     </script>
 </body>
 </html>
