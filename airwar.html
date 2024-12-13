@@ -6,21 +6,21 @@
     <title>飞机大战</title>
     <style>
         body {
-            font-family: Arial, sans-serif; /* 设置字体 */
-            background-color: #000; /* 设置背景为黑色 */
+            font-family: Arial, sans-serif;
+            background-color: #000;
             margin: 0;
-            overflow: hidden; /* 隐藏滚动条 */
-            color: white; /* 设置字体颜色为白色 */
-            text-align: center; /* 设置文本居中 */
+            overflow: hidden;
+            color: white;
+            text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh; /* 设置全屏高度 */
+            height: 100vh;
         }
 
         canvas {
-            display: block; /* 确保canvas块级元素 */
+            display: block;
         }
 
         #score {
@@ -37,7 +37,7 @@
             width: 80%;
             max-width: 300px;
             height: 200px;
-            background-color: rgba(0, 0, 0, 0.8);/* 半透明背景 */
+            background-color: rgba(0, 0, 0, 0.8);
             border-radius: 10px;
             padding: 20px;
             text-align: center;
@@ -57,7 +57,7 @@
         }
 
         .mode-selection button:hover {
-            background-color: #666;/* 鼠标悬停时按钮颜色变化 */
+            background-color: #666;
         }
 
         #backButton {
@@ -80,56 +80,44 @@
 </head>
 <body>
     <button id="backButton">返回</button>
-    <canvas id="gameCanvas"></canvas><!-- 游戏画布 -->
-    <div id="score">得分: 0</div><!-- 显示得分 -->
+    <canvas id="gameCanvas"></canvas>
+    <div id="score">得分: 0</div>
 
     <div id="modeSelection" class="mode-selection" style="display: none;">
         <p style="font-size: 24px; color: white;">选择游戏模式</p>
         <button id="easyMode">简单模式</button>
         <button id="hardMode">困难模式</button>
     </div>
-    
+
     <script>
-
-        // 创建背景音频对象
-        const bgMusic = new Audio('audio/RiotGames.mp3'); // 设置音频文件路径
-        bgMusic.loop = true; // 循环播放音频
-        bgMusic.volume = 1; // 设置音量
-
         document.getElementById('backButton').addEventListener('click', () => {
-            bgMusic.pause(); // 暂停音频
-            bgMusic.currentTime = 0; // 重置音频到开始位置
-            window.location.href = 'game.html'; // 返回游戏主页
-
+            window.location.href = 'game.html'; // Replace with your local page path
         });
 
-        // 获取canvas元素和绘图上下文
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        // 加载玩家、敌人和背景图片
+
         const playerImg = new Image();
-        playerImg.src = 'fonts/mj.png'; 
+        playerImg.src = 'fonts/mj.png'; // Changed to local path
         const enemyImg = new Image();
-        enemyImg.src = 'fonts/dj.png'; 
+        enemyImg.src = 'fonts/dj.png'; // Changed to local path
         const backgroundImg = new Image();
-        backgroundImg.src = 'fonts/SK2.jpeg'; 
+        backgroundImg.src = 'fonts/SK2.jpeg'; // Background image path
+
         let playerReady = false;
-        // 背景加载完成后显示模式选择框
         playerImg.onload = () => {
             playerReady = true;
             drawModeSelection(); // 在背景加载完后显示模式选择框
         };
-        // 设置画布宽高
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 100; 
-         // 游戏区域的参数
-        const CENTER_COLUMN_WIDTH = 500; // 中心区域宽度
-        const COLUMN_COUNT = 5; // 列数
-        const COLUMN_WIDTH = CENTER_COLUMN_WIDTH / COLUMN_COUNT; // 每列宽度
+        canvas.height = window.innerHeight - 100; // Adjusted to leave space for score
 
+        const CENTER_COLUMN_WIDTH = 500;
+        const COLUMN_COUNT = 5;
+        const COLUMN_WIDTH = CENTER_COLUMN_WIDTH / COLUMN_COUNT;
 
         const centerStartX = (canvas.width - CENTER_COLUMN_WIDTH) / 2;
-        // 玩家和敌人的大小
+
         const PLAYER_WIDTH = 100;
         const PLAYER_HEIGHT = 100;
         const ENEMY_WIDTH = 50;
@@ -138,26 +126,25 @@
         const BULLET_HEIGHT = 10;
 
         let score = 0;
-        let gameOver = false; // 游戏是否结束
-        let lastBulletTime = 0; // 上次发射子弹的时间
-        const BULLET_INTERVAL = 200; // 子弹间隔时间
+        let gameOver = false;
+        let lastBulletTime = 0;
+        const BULLET_INTERVAL = 200;
 
-        let enemySpawnRate = 0.0025; // 敌人生成速率
-        const enemySpawnRateIncrement = 0.00012; // 增加的生成速率
-        let maxSpawnRate = 0.03; // 最大生成速率
-        let enemySpeed = 0.7; // 敌人速度
+        let enemySpawnRate = 0.0025;
+        const enemySpawnRateIncrement = 0.00012;
+        let maxSpawnRate = 0.03;
+        let enemySpeed = 0.7;
 
-        // 玩家对象
         const player = {
             x: canvas.width / 2 - PLAYER_WIDTH / 2,
             y: canvas.height - PLAYER_HEIGHT - 10,
             width: PLAYER_WIDTH,
             height: PLAYER_HEIGHT,
-            speed: 5, // 玩家移动速度
-            bullets: [], // 玩家子弹数组
+            speed: 5,
+            bullets: [],
         };
 
-        const enemies = [];//敌人数组
+        const enemies = [];
 
         const keys = {
             left: false,
@@ -182,12 +169,11 @@
                 canvas.height
             );
         }
-        //绘制玩家
 
         function drawPlayer() {
             ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
         }
-        // 绘制子弹
+
         function drawBullets() {
             ctx.fillStyle = 'yellow';
             player.bullets.forEach((bullet, index) => {
@@ -195,22 +181,20 @@
                 ctx.fillRect(bullet.x, bullet.y, BULLET_WIDTH, BULLET_HEIGHT);
 
                 if (bullet.y < 0) {
-                    player.bullets.splice(index, 1);// 删除超出屏幕的子弹
+                    player.bullets.splice(index, 1);
                 }
             });
         }
 
-        //绘制敌人
         function drawEnemies() {
             enemies.forEach((enemy, enemyIndex) => {
-                enemy.y += enemySpeed;//敌人下移
+                enemy.y += enemySpeed;
                 ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
 
-                if (enemy.y > canvas.height) {//敌人掉出屏幕游戏结束
+                if (enemy.y > canvas.height) {
                     gameOver = true;
                 }
 
-                // 检测子弹与敌人碰撞
                 player.bullets.forEach((bullet, bulletIndex) => {
                     if (
                         bullet.x < enemy.x + enemy.width &&
@@ -218,48 +202,40 @@
                         bullet.y < enemy.y + enemy.height &&
                         bullet.y + BULLET_HEIGHT > enemy.y
                     ) {
-                        player.bullets.splice(bulletIndex, 1); // 删除碰撞的子弹
-                        enemies.splice(enemyIndex, 1); // 删除碰撞的敌人
+                        player.bullets.splice(bulletIndex, 1);
+                        enemies.splice(enemyIndex, 1);
 
-                        score += 100; // 增加分数
+                        score += 100;
                         document.getElementById('score').textContent = `得分: ${score}`;
                     }
                 });
             });
         }
 
-
-        // 生成敌人
         function spawnEnemies() {
             if (Math.random() < enemySpawnRate) {
-                const column = Math.floor(Math.random() * COLUMN_COUNT); // 随机选择列
+                const column = Math.floor(Math.random() * COLUMN_COUNT);
                 const x = centerStartX + column * COLUMN_WIDTH + (COLUMN_WIDTH - ENEMY_WIDTH) / 2;
                 enemies.push({ x: x, y: 0, width: ENEMY_WIDTH, height: ENEMY_HEIGHT });
             }
         }
 
-        // 显示模式选择界面
         function drawModeSelection() {
             const modeSelectionDiv = document.getElementById('modeSelection');
-            modeSelectionDiv.style.display = 'block'; // 显示选择框
+            modeSelectionDiv.style.display = 'block';
 
             const easyModeButton = document.getElementById('easyMode');
             const hardModeButton = document.getElementById('hardMode');
 
-            // 简单模式按钮点击事件
             easyModeButton.addEventListener('click', () => {
-                bgMusic.play(); // 播放背景音乐
-                startGame('easy'); // 开始游戏
+                startGame('easy');
             });
 
-            // 困难模式按钮点击事件
             hardModeButton.addEventListener('click', () => {
-                bgMusic.play(); // 播放背景音乐
-                startGame('hard'); // 开始游戏
+                startGame('hard');
             });
         }
 
-        //启动游戏
         function startGame(mode) {
             document.getElementById('modeSelection').style.display = 'none';
 
@@ -298,8 +274,6 @@
         }
 
         function drawGameOverScreen() {
-           
-
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -335,7 +309,6 @@
             if (Date.now() - lastBulletTime > BULLET_INTERVAL) {
                 player.bullets.push({ x: player.x + player.width / 2 - BULLET_WIDTH / 2, y: player.y });
                 lastBulletTime = Date.now();
-                
             }
         }
 
