@@ -502,14 +502,14 @@
               //触摸事件监听
             let startX, startY, endX, endY;
         
-            document.addEventListener('touchmove', function(evt) {
+            document.addEventListener('touchstart', function(evt) {
                 startX = evt.touches[0].pageX;
                 startY = evt.touches[0].pageY;
             }, false);
         
             document.addEventListener('touchmove', function(evt) {
                 evt.preventDefault(); //防止页面滚动
-            }, false);
+            }, {passive: false});
         
             document.addEventListener('touchend', function(evt) {
                 endX = evt.changedTouches[0].pageX;
@@ -528,7 +528,7 @@
                     }
                 }
                 else {
-                    if(diffY > 0) {
+                    if(diffY < 0) {
                         keyDown();
                     }
                     else {
