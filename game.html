@@ -499,12 +499,14 @@
                 generate();
             }
 
-           document.addEventListener('touchmove', function(event) {
+            document.addEventListener('touchmove', function(event) {
                 event.preventDefault();
             }, false);
         
             function touchStartFunc(evt) {
                 try {
+                    evt.preventDefault(); //阻止默认缩放和滚动
+        
                     var touch = evt.touches[0];
                     var x = Number(touch.pageX);
                     var y = Number(touch.pageY);
@@ -545,7 +547,7 @@
         
             function touchEndFunc(evt) {
                 try{
-        
+                    evt.preventDefault();
                 }
                 catch(e) 
                 {
@@ -569,7 +571,6 @@
                     alert("no touchEvent!" + e.message);
                 }
             }
-
 
             function checkForWin() {
                 for (let i = 0; i < squares.length; i++) {
