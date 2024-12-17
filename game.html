@@ -467,8 +467,8 @@
                 startY = touch.pageY;
             });
         
-            gridDisplay.addEventListener("touched", (e) => {
-                const touch = e.changdTouches[0];
+            gridDisplay.addEventListener("touchend", (e) => {
+                const touch = e.changedTouches[0];
                 endX = touch.pageX;
                 endY = touch.pageY;
         
