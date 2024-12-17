@@ -458,6 +458,40 @@
                 checkForWin();
             }
 
+            //触控手势控制
+            let startX, startY, endX, endY;
+        
+            gridDisplay.addEventListener("touchstart", (e) => {
+                const touch = e.touches[0];
+                startX = touch.pageX;
+                startY = touch.pageY;
+            });
+        
+            gridDisplay.addEventListener("touched", (e) => {
+                const touch = e.changdTouches[0];
+                endX = touch.pageX;
+                endY = touch.pageY;
+        
+                const diffX = endX - startX;
+                const diffY = endY- startY;
+        
+                if(Math.abs(diffX) > Math.abs(diffY)) {
+                    //水平
+                    if(diffX > 0) {
+                        keyRight();
+                    } else {
+                        keyLeft();
+                    }
+                } else {
+                    //垂直
+                    if(diffY > 0) {
+                        keyDown();
+                    } else {
+                        keyUp();
+                    }
+                }
+            });
+
             function control(e) {
                 if (e.key === "ArrowLeft") {
                     keyLeft();
@@ -497,79 +531,6 @@
                 combineColumn();
                 moveDown();
                 generate();
-            }
-
-            document.addEventListener('touchmove', function(event) {
-                event.preventDefault();
-            }, false);
-        
-            function touchStartFunc(evt) {
-                try {
-                    evt.preventDefault(); //阻止默认缩放和滚动
-        
-                    var touch = evt.touches[0];
-                    var x = Number(touch.pageX);
-                    var y = Number(touch.pageY);
-        
-                    startX = x;
-                    startY = y;
-                }
-                catch(e) {
-                    alert('touchStartFunc: ' + e.message);
-                }
-            }
-        
-            function touchMoveFunc(evt) {
-                try { 
-                    var touch = evt.touches[0];
-                    var x = Number(touch.pageX);
-                    var y = Number(touch.pageY); 
-        
-                    if(Math.abs(x-startX)<Math.abs(y-startY))
-                    {
-                        if(y-startY>0) 
-                            keyUp();
-                        else
-                            keyDown();
-                    }
-                    else{
-                        if(x-startX > 0)
-                            keyRight();
-                        else
-                            keyLeft();
-                    }
-                }
-                catch(e)
-                {
-                    alert('touchMoveFunc: ' + e.message);
-                }
-            }
-        
-            function touchEndFunc(evt) {
-                try{
-                    evt.preventDefault();
-                }
-                catch(e) 
-                {
-                    alert('touchEndFunc: ' + e.message);
-                }
-            }
-        
-            function bindEvent() {
-                document.addEventListener('touchstart', touchStartFunc, false);
-                document.addEventListener('touchmove', touchMoveFunc, false);
-                document.addEventListener('touchend', touchEndFunc, false);
-            }
-        
-            function isTouchDevice() {
-                try {
-                    document.createEvent("TouchEvent");
-        
-                    bindEvent();
-                }
-                catch(e){
-                    alert("no touchEvent!" + e.message);
-                }
             }
 
             function checkForWin() {
