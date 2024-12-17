@@ -499,44 +499,76 @@
                 generate();
             }
 
-              //触摸事件监听
-            let startX, startY, endX, endY;
-        
-            document.addEventListener('touchstart', function(evt) {
-                startX = evt.touches[0].pageX;
-                startY = evt.touches[0].pageY;
+           document.addEventListener('touchmove', function(event) {
+                event.preventDefault();
             }, false);
         
-            document.addEventListener('touchmove', function(evt) {
-                evt.preventDefault(); //防止页面滚动
-            }, {passive: false});
+            function touchStartFunc(evt) {
+                try {
+                    var touch = evt.touches[0];
+                    var x = Number(touch.pageX);
+                    var y = Number(touch.pageY);
         
-            document.addEventListener('touchend', function(evt) {
-                endX = evt.changedTouches[0].pageX;
-                endY = evt.changedTouches[0].pageY;
+                    startX = x;
+                    startY = y;
+                }
+                catch(e) {
+                    alert('touchStartFunc: ' + e.message);
+                }
+            }
         
-                let diffX = endX - startX;
-                let diffY = endY - startY;
+            function touchMoveFunc(evt) {
+                try { 
+                    var touch = evt.touches[0];
+                    var x = Number(touch.pageX);
+                    var y = Number(touch.pageY); 
         
-                if(Math.abs(diffX) > Math.abs(diffY)) {
-                    //水平滑动
-                    if(diffX > 0) {
-                        keyRight();
+                    if(Math.abs(x-startX)<Math.abs(y-startY))
+                    {
+                        if(y-startY>0) 
+                            keyUp();
+                        else
+                            keyDown();
                     }
-                    else {
-                        keyLeft();
+                    else{
+                        if(x-startX > 0)
+                            keyRight();
+                        else
+                            keyLeft();
                     }
                 }
-                else {
-                    if(diffY < 0) {
-                        keyDown();
-                    }
-                    else {
-                        keyUp();
-                    }
+                catch(e)
+                {
+                    alert('touchMoveFunc: ' + e.message);
                 }
-            }, false);
-
+            }
+        
+            function touchEndFunc(evt) {
+                try{
+        
+                }
+                catch(e) 
+                {
+                    alert('touchEndFunc: ' + e.message);
+                }
+            }
+        
+            function bindEvent() {
+                document.addEventListener('touchstart', touchStartFunc, false);
+                document.addEventListener('touchmove', touchMoveFunc, false);
+                document.addEventListener('touchend', touchEndFunc, false);
+            }
+        
+            function isTouchDevice() {
+                try {
+                    document.createEvent("TouchEvent");
+        
+                    bindEvent();
+                }
+                catch(e){
+                    alert("no touchEvent!" + e.message);
+                }
+            }
 
 
             function checkForWin() {
